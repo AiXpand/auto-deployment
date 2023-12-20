@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from ansible.module_utils.basic import AnsibleModule
+
 import subprocess
 import sys
 
@@ -16,6 +17,7 @@ def main():
     argument_spec={}
   )
 
+
   hostname = get_hostname()
   result = dict(
     changed=False,
@@ -23,6 +25,8 @@ def main():
     ansible_facts=dict( 
       remote_hostname=hostname,
       remote_python=sys.version,
+      remote_os=sys.platform,
+
     )
   )
   module.exit_json(**result)
