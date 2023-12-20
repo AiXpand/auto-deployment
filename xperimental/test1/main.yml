@@ -1,0 +1,20 @@
+# testing action plugins in ansible
+---
+- name: Hello world action plugin
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Run the plugin
+      test_action_plugin:
+        key1: "Hello world from the playbook"
+      register: my_action_variable
+
+    - name: Print the result 1
+      ansible.builtin.debug:
+        msg: "Changed: {{ my_action_variable.msg }}"
+      when: my_action_variable.changed
+
+    - name: Print the result 1
+      ansible.builtin.debug:
+        msg: "Not changed: {{ my_action_variable.msg }}"
+      when: not my_action_variable.changed

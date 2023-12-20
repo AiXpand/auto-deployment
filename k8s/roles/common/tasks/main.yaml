@@ -1,0 +1,65 @@
+---
+- name: Install Docker prerequisites
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+
+- name: Add Docker’s official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Install Docker CE
+  apt:
+    name: docker-ce
+    update_cache: yes
+
+- name: Add user to Docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+# Tasks for Kubernetes components installation
+
+- name: Add Kubernetes GPG key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes Repository
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+
+- name: Install Kubernetes components
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  notify: Restart kubelet
+
+- name: Disable swap
+  shell: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Remove swap entry from /etc/fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^\s*\S+\s+none\s+swap\s+sw\s+0\s+0'
+    line: '#\0'
+    backrefs: yes

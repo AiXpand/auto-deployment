@@ -1,0 +1,14 @@
+---
+- name: Join Kubernetes Cluster
+  become: yes
+  command: "{{ hostvars['master'].join_command }}"
+  register: join_cluster
+  until: join_cluster.rc == 0
+  retries: 5
+  delay: 30
+  when: join_command is defined
+
+- name: Check if the node has joined the cluster
+  become: yes
+  shell: kubectl get nodes
+  delegate_to: "{{ groups['masters'][0] }}"

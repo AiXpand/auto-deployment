@@ -1,0 +1,36 @@
+---
+- name: Initialize the Kubernetes Cluster
+  become: yes
+  shell: kubeadm init --pod-network-cidr=192.168.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create .kube directory
+  become: yes
+  become_user: "{{ ansible_user }}"
+  file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: 0755
+
+- name: Copy admin.conf to User's Home
+  become: yes
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+- name: Apply Calico Network Plugin
+  become: yes
+  command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+- name: Wait for CoreDNS to be Ready
+  become: yes
+  shell: kubectl get pods --namespace kube-system -l k8s-app=kube-dns -o jsonpath='{.items[?(@.status.phase=="Running")].metadata.name}'
+  register: dns_pods
+  until: dns_pods.stdout != ""
+  retries: 12
+  delay: 10

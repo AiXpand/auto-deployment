@@ -1,0 +1,12 @@
+# Notification: When the "Install Kubernetes components" task makes changes (like installing or updating the packages), 
+#   it notifies the handler named Restart kubelet.
+# Handler Execution: At the end of the play, if the handler was notified, it will execute. 
+#   In this case, it will restart the kubelet service.
+# Idempotency: If the Kubernetes components are already at the desired state and no changes are made 
+#   by the task, the handler will not be notified, and thus, not run. This is part of Ansible's idempotent 
+#   behavior, ensuring that changes are only made when necessary.
+---
+- name: Restart kubelet
+  service:
+    name: kubelet
+    state: restarted
