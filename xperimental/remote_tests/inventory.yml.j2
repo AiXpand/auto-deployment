@@ -1,0 +1,9 @@
+all:
+  vars:
+    ansible_ssh_private_key_file: "{{ RTEST_SSH_PEM }}"
+    ansible_user: "{{ RTEST_USER }}"
+  hosts:
+    gcpvm1:
+      ansible_host: "{{ RTEST_IP1 }}"      
+      # Uncomment the following line if you need to specify a custom SSH port
+      # ansible_ssh_port: "{{ RTEST_PORT1 | default(2200) }}"

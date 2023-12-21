@@ -5,6 +5,8 @@ from ansible.module_utils.basic import AnsibleModule
 import subprocess
 import sys
 
+__VERSION__ = '0.1'
+
 def get_hostname():
   try:
     hostname = subprocess.check_output('hostname', shell=True).decode().strip()
@@ -26,7 +28,7 @@ def main():
       remote_hostname=hostname,
       remote_python=sys.version,
       remote_os=sys.platform,
-
+      remote_ver=__VERSION__,
     )
   )
   module.exit_json(**result)

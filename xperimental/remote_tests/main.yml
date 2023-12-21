@@ -1,0 +1,30 @@
+# testing action plugins in ansible
+---
+- name: Generate Inventory from Template
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Load environment variables from .env file
+      shell: "cat ./.env | grep -v '^#' | grep -v '^$'"
+      register: dotenv
+      changed_when: false
+
+    - name: Set environment variables
+      set_fact:
+        "{{ item.split('=')[0] }}": "{{ item.split('=')[1] }}"
+      loop: "{{ dotenv.stdout_lines }}"
+      
+    - name: Create inventory from template
+      template:
+        src: inventory.yml.j2
+        dest: ./inventory.yml
+        
+    - name: Refresh Inventory
+      meta: refresh_inventory
+        
+- name: Remote data gather & action plugins
+  hosts: all
+  gather_facts: false
+  roles:
+    - test-role
+ 
